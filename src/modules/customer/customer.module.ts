@@ -6,7 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { OtpSchema } from 'src/schemas/otp.schema';
 import { CommonUtilsService } from 'src/common-utils/common-utils.service';
 import { JwtAuthService } from '../jwt-auth/jwt-auth.service';
-import { JwtAuthModule } from '../jwt-auth/jwt-auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { JwtAuthModule } from '../jwt-auth/jwt-auth.module';
       { name: 'Customer', schema: CustomerSchema },
       { name: 'Otp', schema: OtpSchema },
     ]),
-    JwtAuthModule,
+    JwtModule,
   ],
   controllers: [CustomerController],
   providers: [CustomerService, CommonUtilsService, JwtAuthService],
