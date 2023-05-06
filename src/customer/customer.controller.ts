@@ -7,7 +7,7 @@ export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @Get('continue')
-  getHello(): Promise<Customer> {
+  continue(): Promise<Customer> {
     return this.customerService.continue();
   }
 }

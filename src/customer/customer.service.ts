@@ -1,20 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Customer } from 'src/schemas/customer.schema';
+import { to } from 'await-to-js';
 
 @Injectable()
 export class CustomerService {
   constructor(
-    @InjectModel(Customer.name) private customerModel: Model<Customer>,
+    @InjectModel('Customer') private customerModel: Model<Customer>,
   ) {}
 
-  continue(): Promise<Customer> {
+  async continue(): Promise<Customer> {
     const createdCustomer = new this.customerModel({
-      name: 'customer1',
-      age: 21,
-      breed: 'IDK what this is',
+      phoneNumber: '9899096444',
+      countryCode: '91',
     });
-    return createdCustomer.save();
+    const [createCustomerError, createCustomerResult] = await to(
+      createdCustomer.save(),
+    );
+    if (createCustomerError) {
+      throw new HttpException(
+        `Failed to create customer: ${createCustomerError.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return createCustomerResult;
   }
 }

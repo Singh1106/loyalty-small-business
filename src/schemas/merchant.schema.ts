@@ -1,6 +1,6 @@
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose from 'mongoose';
 
-export const CustomerSchema = new mongoose.Schema({
+export const MerchantSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     unique: true,
@@ -15,5 +15,3 @@ export const CustomerSchema = new mongoose.Schema({
     type: String,
   },
 });
-
-export type Customer = HydratedDocument<typeof CustomerSchema>;
