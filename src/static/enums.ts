@@ -4,3 +4,8 @@ export enum NonLoyaltyPaymentMethods {
   creditCard,
   debitCard,
 }
+
+export enum UserTypes {
+  customer,
+  merchant,
+}
