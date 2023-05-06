@@ -30,6 +30,13 @@ export class ContinueCustomerBodyForm {
 
 export class ValidateOtpCustomerBodyForm {
   @ApiProperty({
+    description: `Customer's phone number`,
+    example: '9898989898',
+    type: String,
+  })
+  @IsString()
+  phoneNumber: string;
+  @ApiProperty({
     description: `Customer's otp to continue`,
     example: '123456',
     type: String,

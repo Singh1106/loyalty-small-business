@@ -24,4 +24,24 @@ export class CommonUtilsService {
 `,
     });
   }
+
+  validateOtp(dbOtp: string, expiry: string, userOtp: string): boolean {
+    if (dbOtp != userOtp) {
+      return false;
+    }
+    const now = new Date();
+    if (new Date(expiry) < now) {
+      return false;
+    }
+    return true;
+  }
+  generateOtp(length: number): string {
+    const chars =
+      '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let otp = '';
+    for (let i = 0; i < length; i++) {
+      otp += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return otp;
+  }
 }

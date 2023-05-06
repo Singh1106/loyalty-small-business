@@ -15,8 +15,23 @@ export const MerchantSchema = new mongoose.Schema(
       required: false,
       type: String,
     },
+    tokens: [
+      {
+        type: String,
+        required: false,
+      },
+    ],
   },
   {
     timestamps: true,
   },
 );
+
+export type Merchant = mongoose.Document & {
+  phoneNumber: string;
+  countryCode: string;
+  name?: string;
+  tokens?: string[];
+};
+
+export const MerchantModel = mongoose.model('merchant', MerchantSchema);

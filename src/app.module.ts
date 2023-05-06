@@ -3,13 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CustomerModule } from './customer/customer.module';
-import { BusinessModule } from './business/business.module';
-import { MerchantModule } from './merchant/merchant.module';
-import { TransactionModule } from './transaction/transaction.module';
+import { CustomerModule } from './modules/customer/customer.module';
+import { BusinessModule } from './modules/business/business.module';
+import { MerchantModule } from './modules/merchant/merchant.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { CommonUtilsService } from './common-utils/common-utils.service';
-
+import { JwtAuthModule } from './modules/jwt-auth/jwt-auth.module';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: 'dev.env' }),
@@ -20,10 +21,14 @@ import { CommonUtilsService } from './common-utils/common-utils.service';
         from: '"nest-modules" <modules@nestjs.com>',
       },
     }),
+    DevtoolsModule.register({
+      http: process.env.NODE_ENV !== 'production',
+    }),
     CustomerModule,
     BusinessModule,
     MerchantModule,
     TransactionModule,
+    JwtAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, CommonUtilsService],
