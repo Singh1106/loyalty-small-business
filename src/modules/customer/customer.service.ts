@@ -74,9 +74,9 @@ export class CustomerService {
   async validateOtpAndGenerateToken(
     form: ValidateOtpCustomerBodyForm,
   ): Promise<{ token: string }> {
-    const customer = await this.customerModel
-      .findOne({ phoneNumber: form.phoneNumber })
-      .exec();
+    const customer = await this.customerModel.findOne({
+      phoneNumber: form.phoneNumber,
+    });
     if (!customer) {
       throw new HttpException(
         `Failed to find customer with phoneNumber ${form.phoneNumber}`,
@@ -86,8 +86,7 @@ export class CustomerService {
 
     const latestOtp = await this.otpModel
       .findOne({ refId: customer._id })
-      .sort({ createdAt: -1 })
-      .exec();
+      .sort({ createdAt: -1 });
     if (!latestOtp) {
       throw new HttpException(
         'Otp not found.',
@@ -95,12 +94,13 @@ export class CustomerService {
       );
     }
 
-    const isOtpValid = this.commonUtilsService.validateOtp(
-      latestOtp.otp,
-      latestOtp.expiry,
-      form.otp,
-    );
-    if (!isOtpValid) {
+    if (
+      !this.commonUtilsService.validateOtp(
+        latestOtp.otp,
+        latestOtp.expiry,
+        form.otp,
+      )
+    ) {
       throw new HttpException(
         'Otp not correct or expired. Please try again.',
         HttpStatus.BAD_REQUEST,
