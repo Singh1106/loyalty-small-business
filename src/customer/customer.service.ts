@@ -7,46 +7,51 @@ import {
   ContinueCustomerBodyForm,
   ValidateOtpCustomerBodyForm,
 } from './DTO/customer.dto';
-import {
-  generateJWT,
-  generateOtp,
-  sendOtpToMail,
-  validateOtp,
-} from 'src/utils/commonUtils';
+import { generateJWT, generateOtp, validateOtp } from 'src/utils/commonUtils';
 import { Otp } from 'src/schemas/otp.schema';
 import { UserTypes } from 'src/static/enums';
+import { CommonUtilsService } from 'src/common-utils/common-utils.service';
 
 @Injectable()
 export class CustomerService {
   constructor(
     @InjectModel('Customer') private customerModel: Model<Customer>,
     @InjectModel('Otp') private otpModel: Model<Otp>,
+    private readonly commonUtilsService: CommonUtilsService,
   ) {}
 
-  async continue(
+  async findOrCreateCustomerAndSendOtp(
     form: ContinueCustomerBodyForm,
   ): Promise<{ status: string; msg: string }> {
-    const createdCustomer = new this.customerModel(form);
-    const [createCustomerError, createCustomerResult] = await to(
-      createdCustomer.save(),
+    let customer: Customer;
+    const [findCustomerError, findCustomerResult] = await to(
+      this.customerModel.find({ phoneNumber: form.phoneNumber }),
     );
-    if (createCustomerError) {
-      throw new HttpException(
-        `Failed to create customer: ${createCustomerError.message}`,
-        HttpStatus.BAD_REQUEST,
+    if (findCustomerResult.length === 0 && !findCustomerError) {
+      const createdCustomer = new this.customerModel(form);
+      const [createCustomerError, createCustomerResult] = await to(
+        createdCustomer.save(),
       );
+      if (createCustomerError) {
+        throw new HttpException(
+          `Failed to create customer: ${createCustomerError.message}`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      customer = createCustomerResult;
+    } else if (!findCustomerError && findCustomerResult.length) {
+      customer = findCustomerResult[0];
     }
     const otp = generateOtp(6);
     const now = new Date();
     const expiryTime = new Date(
       now.getTime() + Number(process.env.OTP_TIME_OUT) * 60 * 1000,
     );
-    const expiryTimeEpochTime = Math.floor(expiryTime.getTime() / 1000);
     const createdOtp = new this.otpModel({
       otp,
       userType: UserTypes.customer,
-      refId: createCustomerResult._id,
-      expiry: expiryTimeEpochTime,
+      refId: customer._id,
+      expiry: expiryTime,
     });
     const [createOtpForCustomerError] = await to(createdOtp.save());
     if (createOtpForCustomerError) {
@@ -55,16 +60,16 @@ export class CustomerService {
         HttpStatus.BAD_GATEWAY,
       );
     }
-    sendOtpToMail('jswork@gmail.com', otp);
+    this.commonUtilsService.sendOtpToMail('jswork98@gmail.com', otp);
     // todo: update to sendOtpToPhone after configuring twilio
 
     return {
       status: 'success',
-      msg: 'Customer generated Successfully, sent otp',
+      msg: 'Customer exists Successfully, sent otp',
     };
   }
 
-  async validateOtp(
+  async validateOtpAndGenerateToken(
     form: ValidateOtpCustomerBodyForm,
     userId: string,
   ): Promise<{ token: string }> {
@@ -78,7 +83,7 @@ export class CustomerService {
       );
     }
     const [findOtpError, findOtpResult] = await to(
-      this.otpModel.findOneAndDelete({ refId: userId }),
+      this.otpModel.findOne({ refId: userId }),
     );
     if (findOtpError) {
       throw new HttpException(
@@ -92,7 +97,10 @@ export class CustomerService {
       form.otp,
     );
     if (!isOtpValid) {
-      throw new HttpException('Otp not correct', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Otp not correct or expired. Please try again.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const token = generateJWT({ customerId: userId }, `14d`);
     findCustomerResult.tokens.push(token);

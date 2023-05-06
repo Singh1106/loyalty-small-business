@@ -4,6 +4,7 @@ import { CustomerService } from './customer.service';
 import { CustomerSchema } from 'src/schemas/customer.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OtpSchema } from 'src/schemas/otp.schema';
+import { CommonUtilsService } from 'src/common-utils/common-utils.service';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { OtpSchema } from 'src/schemas/otp.schema';
     ]),
   ],
   controllers: [CustomerController],
-  providers: [CustomerService],
+  providers: [CustomerService, CommonUtilsService],
 })
 export class CustomerModule {}

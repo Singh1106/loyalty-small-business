@@ -1,5 +1,4 @@
 import { sign } from 'jsonwebtoken';
-import { transporter } from './nodemailer';
 
 export const generateJWT = (data: any, expiry: string): string => {
   const token = sign(data, process.env.JWT_SECRET, {
@@ -30,6 +29,7 @@ export const validateOtp = (
   if (new Date(expiry) < now) {
     return false;
   }
+  console.log(dbOtp, userOtp);
   return true;
 };
 
@@ -40,29 +40,3 @@ export const validateOtp = (
 //   phoneNumber: string;
 //   countryCode: string;
 // }) => {};
-
-export const sendOtpToMail = async (email: string, otp: string) => {
-  const mailOptions = {
-    from: process.env.SENDER_EMAIl,
-    to: email,
-    subject: 'OTP for IsItBusiness By Jaswinder Singh.',
-    html: `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>OTP for your login</title>
-</head>
-<body>
-  <p>Your OTP is <strong>${otp}</strong>.</p>
-  <p>It is valid for 10 minutes.</p>
-</body>
-</html>
-`,
-  };
-  try {
-    await transporter.sendMail(mailOptions);
-    return { otp };
-  } catch (error) {
-    console.log(error);
-  }
-};

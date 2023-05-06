@@ -9,17 +9,20 @@ import {
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
-  @Post('continue')
-  continue(
+  @Post('findOrCreateCustomerAndSendOtp')
+  findOrCreateCustomerAndSendOtp(
     @Body() form: ContinueCustomerBodyForm,
   ): Promise<{ status: string; msg: string }> {
-    return this.customerService.continue(form);
+    return this.customerService.findOrCreateCustomerAndSendOtp(form);
   }
 
-  @Post('validateOtp')
-  validateOtp(
+  @Post('validateOtpAndGenerateToken')
+  validateOtpAndGenerateToken(
     @Body() form: ValidateOtpCustomerBodyForm,
   ): Promise<{ token: string }> {
-    return this.customerService.validateOtp(form, '123');
+    return this.customerService.validateOtpAndGenerateToken(
+      form,
+      '64567bdcec7887d09301d53e',
+    );
   }
 }
