@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -11,6 +11,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { CommonUtilsService } from './common-utils/common-utils.service';
 import { JwtAuthModule } from './modules/jwt-auth/jwt-auth.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { LoggingMiddleware } from './middlewares/logging';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: 'dev.env' }),
@@ -33,4 +34,8 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
   controllers: [AppController],
   providers: [AppService, CommonUtilsService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}
