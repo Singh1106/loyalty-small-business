@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
 import { JwtTokenPayload } from 'src/static/jwt-interface';
+import { Request } from 'express';
 
 export class ContinueCustomerBodyForm {
   @ApiProperty({
