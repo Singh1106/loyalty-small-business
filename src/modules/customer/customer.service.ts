@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Customer } from 'src/schemas/customer.schema';
-import { to } from 'await-to-js';
 import {
   ContinueCustomerBodyForm,
   ValidateOtpCustomerBodyForm,
@@ -11,6 +10,7 @@ import { Otp } from 'src/schemas/otp.schema';
 import { UserTypes } from 'src/static/enums';
 import { CommonUtilsService } from 'src/common-utils/common-utils.service';
 import { JwtAuthService } from '../jwt-auth/jwt-auth.service';
+import to from 'await-to-js';
 
 @Injectable()
 export class CustomerService {
@@ -24,34 +24,78 @@ export class CustomerService {
   async findOrCreateCustomerAndSendOtp(
     form: ContinueCustomerBodyForm,
   ): Promise<{ status: string; msg: string }> {
-    try {
-      const customer = await this.findOrCreateCustomer(form);
-      const otp = await this.generateAndSaveOtp(customer);
-      await this.sendOtpToEmail('jswork98@gmail.com', otp.otp);
-      return {
-        status: 'success',
-        msg: 'Customer exists Successfully, sent otp',
-      };
-    } catch (error) {
+    const [err, customer] = await to(this.findOrCreateCustomer(form));
+
+    if (err) {
       throw new HttpException(
-        `Failed to create or send otp to customer: ${error.message}`,
+        `Failed to create or find customer: ${err.message}`,
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    const [otpErr, otp] = await to(this.generateAndSaveOtp(customer));
+
+    if (otpErr) {
+      throw new HttpException(
+        `Failed to create or save otp: ${otpErr.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const [sendOtpErr] = await to(
+      this.sendOtpToEmail('jswork98@gmail.com', otp.otp),
+    );
+    // todo: use sendOtpToPhone instead.
+
+    if (sendOtpErr) {
+      throw new HttpException(
+        `Failed to send otp to customer: ${sendOtpErr.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return {
+      status: 'success',
+      msg: 'Customer exists Successfully, sent otp',
+    };
   }
+
+  async findCustomerByPhoneNumber(
+    phoneNumber: string,
+  ): Promise<Customer | null> {
+    const [error, existingCustomer] = await to(
+      this.customerModel.findOne({ phoneNumber }),
+    );
+    if (error) {
+      throw new Error(
+        `Error finding customer by phone number: ${error.message}`,
+      );
+    }
+    return existingCustomer;
+  }
+
+  async createCustomer(form: ContinueCustomerBodyForm): Promise<Customer> {
+    const newCustomer = new this.customerModel(form);
+    const [error, createdCustomer] = await to(newCustomer.save());
+    if (error) {
+      throw new Error(`Error creating customer: ${error.message}`);
+    }
+    return createdCustomer;
+  }
+
   async findOrCreateCustomer(
     form: ContinueCustomerBodyForm,
   ): Promise<Customer> {
-    const existingCustomer = await this.customerModel.findOne({
-      phoneNumber: form.phoneNumber,
-    });
+    const existingCustomer = await this.findCustomerByPhoneNumber(
+      form.phoneNumber,
+    );
     if (existingCustomer) {
       return existingCustomer;
     }
-    const newCustomer = new this.customerModel(form);
-    const createdCustomer = await newCustomer.save();
+    const createdCustomer = await this.createCustomer(form);
     return createdCustomer;
   }
+
   async generateAndSaveOtp(customer: Customer): Promise<Otp> {
     const otp = this.commonUtilsService.generateOtp(6);
     const now = new Date();
@@ -67,6 +111,7 @@ export class CustomerService {
     const savedOtp = await createdOtp.save();
     return savedOtp;
   }
+
   async sendOtpToEmail(email: string, otp: string): Promise<void> {
     this.commonUtilsService.sendOtpToMail(email, otp);
   }

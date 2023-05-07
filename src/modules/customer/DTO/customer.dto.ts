@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
+import { JwtTokenPayload } from 'src/static/jwt-interface';
 
 export class ContinueCustomerBodyForm {
   @ApiProperty({
@@ -43,4 +44,8 @@ export class ValidateOtpCustomerBodyForm {
   })
   @IsString()
   otp: string;
+}
+
+export class RequestWithJWTTokenPayload extends Request {
+  tokenPayload: JwtTokenPayload;
 }
