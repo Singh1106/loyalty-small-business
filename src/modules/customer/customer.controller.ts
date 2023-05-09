@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Req, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import {
   ContinueCustomerBodyForm,
@@ -24,10 +31,21 @@ export class CustomerController {
   ): Promise<{ token: string }> {
     return this.customerService.validateOtpAndGenerateToken(form);
   }
-  @UseInterceptors(VerifyJWTAndFetchPayload)
   @Post('protectedRoute')
+  @UseInterceptors(VerifyJWTAndFetchPayload)
   protectedRoute(@Req() request: RequestWithJWTTokenPayload) {
     const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
     return `ProtectedRoute, user: ${jwtTokenPayload.sub}`;
+  }
+
+  @Get('fetchBusinessesIHaveTransactedWith')
+  @UseInterceptors(VerifyJWTAndFetchPayload)
+  async fetchBusinessesIHaveTransactedWith(
+    @Req() request: RequestWithJWTTokenPayload,
+  ) {
+    const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
+    return await this.customerService.fetchBusinessesIHaveTransactedWith(
+      jwtTokenPayload.sub,
+    );
   }
 }

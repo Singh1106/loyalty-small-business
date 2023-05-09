@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Customer } from 'src/schemas/customer.schema';
 import {
   ContinueCustomerBodyForm,
@@ -11,12 +11,17 @@ import { UserTypes } from 'src/static/enums';
 import { CommonUtilsService } from 'src/common-utils/common-utils.service';
 import { JwtAuthService } from '../jwt-auth/jwt-auth.service';
 import to from 'await-to-js';
+import { Transaction } from 'src/schemas/transactions.schema';
+import { Business } from 'src/schemas/business.schema';
 
+const objectId = mongoose.Types.ObjectId;
 @Injectable()
 export class CustomerService {
   constructor(
     @InjectModel('Customer') private customerModel: Model<Customer>,
     @InjectModel('Otp') private otpModel: Model<Otp>,
+    @InjectModel('Transaction') private transactionModel: Model<Transaction>,
+    @InjectModel('Business') private businessModel: Model<Business>,
     private readonly commonUtilsService: CommonUtilsService,
     private readonly jwtAuthService: JwtAuthService,
   ) {}
@@ -157,5 +162,38 @@ export class CustomerService {
     await customer.save();
 
     return { token };
+  }
+
+  async fetchBusinessesIHaveTransactedWith(
+    userId: string,
+  ): Promise<{ name: string; _id: string }[]> {
+    const [fetchTransactionsError, fetchTransactionsResult] = await to(
+      this.transactionModel.find({ customer: userId }),
+    );
+    if (fetchTransactionsError) {
+      throw new HttpException(
+        `Error in fetching transactions. ${fetchTransactionsError.message}`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    const uniqueBusinessesIds = new Set<mongoose.Types.ObjectId>();
+
+    for (const transaction of fetchTransactionsResult) {
+      uniqueBusinessesIds.add(
+        new mongoose.Types.ObjectId(transaction.business.toString()),
+      );
+    }
+    const uniqueBusinessesIdsArray = [...uniqueBusinessesIds]; // set is not an array.
+
+    const businesses = await this.businessModel.find({
+      _id: { $in: uniqueBusinessesIdsArray },
+    });
+    const uniqueBusinesses = businesses.map((business) => {
+      return {
+        name: business.name,
+        _id: business._id,
+      };
+    });
+    return uniqueBusinesses;
   }
 }

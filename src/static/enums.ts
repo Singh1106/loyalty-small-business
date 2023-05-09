@@ -1,11 +1,11 @@
 export enum NonLoyaltyPaymentMethods {
-  upi,
-  netBanking,
-  creditCard,
-  debitCard,
+  upi = 'upi',
+  netBanking = 'netBanking',
+  creditCard = 'creditCard',
+  debitCard = `debitCard`,
 }
 
 export enum UserTypes {
-  customer,
-  merchant,
+  customer = 'customer',
+  merchant = 'merchant',
 }
