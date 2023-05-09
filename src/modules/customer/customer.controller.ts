@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   UseInterceptors,
@@ -31,12 +32,6 @@ export class CustomerController {
   ): Promise<{ token: string }> {
     return this.customerService.validateOtpAndGenerateToken(form);
   }
-  @Post('protectedRoute')
-  @UseInterceptors(VerifyJWTAndFetchPayload)
-  protectedRoute(@Req() request: RequestWithJWTTokenPayload) {
-    const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
-    return `ProtectedRoute, user: ${jwtTokenPayload.sub}`;
-  }
 
   @Get('fetchBusinessesIHaveTransactedWith')
   @UseInterceptors(VerifyJWTAndFetchPayload)
@@ -46,6 +41,19 @@ export class CustomerController {
     const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
     return await this.customerService.fetchBusinessesIHaveTransactedWith(
       jwtTokenPayload.sub,
+    );
+  }
+
+  @Get(`fetchTransactionsWithThisBusiness/:businessId`)
+  @UseInterceptors(VerifyJWTAndFetchPayload)
+  async fetchTransactionsWithThisBusiness(
+    @Req() request: RequestWithJWTTokenPayload,
+    @Param() params: any,
+  ) {
+    const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
+    return await this.customerService.fetchTransactionsWithThisBusiness(
+      jwtTokenPayload.sub,
+      params.businessId,
     );
   }
 }

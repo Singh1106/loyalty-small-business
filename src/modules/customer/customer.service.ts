@@ -13,8 +13,6 @@ import { JwtAuthService } from '../jwt-auth/jwt-auth.service';
 import to from 'await-to-js';
 import { Transaction } from 'src/schemas/transactions.schema';
 import { Business } from 'src/schemas/business.schema';
-
-const objectId = mongoose.Types.ObjectId;
 @Injectable()
 export class CustomerService {
   constructor(
@@ -195,5 +193,15 @@ export class CustomerService {
       };
     });
     return uniqueBusinesses;
+  }
+
+  async fetchTransactionsWithThisBusiness(
+    userId: string,
+    businessId: string,
+  ): Promise<Transaction[]> {
+    return await this.transactionModel.find({
+      customer: userId,
+      business: businessId,
+    });
   }
 }
