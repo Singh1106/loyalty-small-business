@@ -1,15 +1,15 @@
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import { NonLoyaltyPaymentMethods } from 'src/static/enums';
 
 export const TransactionSchema = new mongoose.Schema(
   {
     business: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String, // mongoose.Schema.Types.ObjectId
       ref: 'Business',
       required: true,
     },
     customer: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'Customer',
       required: true,
     },
@@ -32,7 +32,8 @@ export const TransactionSchema = new mongoose.Schema(
           default: 0,
         },
         paymentMethod: {
-          type: NonLoyaltyPaymentMethods,
+          enum: NonLoyaltyPaymentMethods,
+          type: String,
           reqiured: false,
         },
       },
@@ -41,4 +42,19 @@ export const TransactionSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
+);
+
+export type Transaction = mongoose.Document & {
+  business: ObjectId;
+  customer: string;
+  totalAmount: number;
+  amountBreakup: {
+    loyalty: number;
+    nonLoyalty: { amount: number; paymentMethod: NonLoyaltyPaymentMethods };
+  };
+};
+
+export const TransactionModel = mongoose.model(
+  'transaction',
+  TransactionSchema,
 );

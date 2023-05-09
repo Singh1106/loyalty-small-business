@@ -21,3 +21,11 @@ export const BusinessSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+export type Business = mongoose.Document & {
+  name: string;
+  merchant: string;
+  earningPercentage: number;
+};
+
+export const BusinessModel = mongoose.model('business', BusinessSchema);
