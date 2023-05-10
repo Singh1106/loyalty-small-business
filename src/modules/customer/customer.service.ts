@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Customer } from 'src/schemas/customer.schema';
 import {
-  ContinueCustomerBodyForm,
+  FindOrCreateCustomerAndSendOtpForm,
   ValidateOtpCustomerBodyForm,
 } from './DTO/customer.dto';
 import { Otp } from 'src/schemas/otp.schema';
@@ -25,7 +25,7 @@ export class CustomerService {
   ) {}
 
   async findOrCreateCustomerAndSendOtp(
-    form: ContinueCustomerBodyForm,
+    form: FindOrCreateCustomerAndSendOtpForm,
   ): Promise<{ status: string; msg: string }> {
     const [err, customer] = await to(this.findOrCreateCustomer(form));
 
@@ -63,6 +63,19 @@ export class CustomerService {
     };
   }
 
+  async findOrCreateCustomer(
+    form: FindOrCreateCustomerAndSendOtpForm,
+  ): Promise<Customer> {
+    const existingCustomer = await this.findCustomerByPhoneNumber(
+      form.phoneNumber,
+    );
+    if (existingCustomer) {
+      return existingCustomer;
+    }
+    const createdCustomer = await this.createCustomer(form);
+    return createdCustomer;
+  }
+
   async findCustomerByPhoneNumber(
     phoneNumber: string,
   ): Promise<Customer | null> {
@@ -77,25 +90,14 @@ export class CustomerService {
     return existingCustomer;
   }
 
-  async createCustomer(form: ContinueCustomerBodyForm): Promise<Customer> {
+  async createCustomer(
+    form: FindOrCreateCustomerAndSendOtpForm,
+  ): Promise<Customer> {
     const newCustomer = new this.customerModel(form);
     const [error, createdCustomer] = await to(newCustomer.save());
     if (error) {
       throw new Error(`Error creating customer: ${error.message}`);
     }
-    return createdCustomer;
-  }
-
-  async findOrCreateCustomer(
-    form: ContinueCustomerBodyForm,
-  ): Promise<Customer> {
-    const existingCustomer = await this.findCustomerByPhoneNumber(
-      form.phoneNumber,
-    );
-    if (existingCustomer) {
-      return existingCustomer;
-    }
-    const createdCustomer = await this.createCustomer(form);
     return createdCustomer;
   }
 

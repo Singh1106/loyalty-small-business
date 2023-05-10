@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import {
-  ContinueCustomerBodyForm,
+  FindOrCreateCustomerAndSendOtpForm,
   RequestWithJWTTokenPayload,
   ValidateOtpCustomerBodyForm,
 } from './DTO/customer.dto';
@@ -22,7 +22,7 @@ export class CustomerController {
 
   @Post('findOrCreateCustomerAndSendOtp')
   findOrCreateCustomerAndSendOtp(
-    @Body() form: ContinueCustomerBodyForm,
+    @Body() form: FindOrCreateCustomerAndSendOtpForm,
   ): Promise<{ status: string; msg: string }> {
     return this.customerService.findOrCreateCustomerAndSendOtp(form);
   }
