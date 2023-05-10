@@ -1,9 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
-import { JwtTokenPayload } from 'src/static/jwt-interface';
-import { Request } from 'express';
 
-export class FindOrCreateCustomerAndSendOtpForm {
+export class FindOrCreateMerchantAndSendOtpForm {
   @ApiProperty({
     description: `Customer's country code for phone number`,
     example: '91',
@@ -30,23 +28,19 @@ export class FindOrCreateCustomerAndSendOtpForm {
   name?: string;
 }
 
-export class ValidateOtpCustomerBodyForm {
+export class ValidateOtpMerchantBodyForm {
   @ApiProperty({
-    description: `Customer's phone number`,
+    description: `Merchant's phone number`,
     example: '9898989898',
     type: String,
   })
   @IsString()
   phoneNumber: string;
   @ApiProperty({
-    description: `Customer's otp to continue`,
-    example: '123456',
+    description: `Merchant's otp to continue`,
+    example: '1W3R56',
     type: String,
   })
   @IsString()
   otp: string;
-}
-
-export class RequestWithJWTTokenPayload extends Request {
-  tokenPayload: JwtTokenPayload;
 }

@@ -8,7 +8,7 @@ export const BusinessSchema = new mongoose.Schema(
       required: true,
     },
     merchant: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: 'Merchant',
       required: true,
     },
