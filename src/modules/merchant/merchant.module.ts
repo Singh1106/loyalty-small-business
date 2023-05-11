@@ -3,7 +3,6 @@ import { MerchantController } from './merchant.controller';
 import { MerchantService } from './merchant.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BusinessSchema } from 'src/schemas/business.schema';
-import { CustomerSchema } from 'src/schemas/customer.schema';
 import { OtpSchema } from 'src/schemas/otp.schema';
 import { TransactionSchema } from 'src/schemas/transactions.schema';
 import { JwtAuthModule } from '../jwt-auth/jwt-auth.module';
@@ -14,7 +13,6 @@ import { MerchantSchema } from 'src/schemas/merchant.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'Customer', schema: CustomerSchema },
       { name: 'Otp', schema: OtpSchema },
       { name: 'Transaction', schema: TransactionSchema },
       { name: 'Business', schema: BusinessSchema },
