@@ -16,6 +16,7 @@ export class VerifyJWTAndFetchPayload implements NestInterceptor {
       authorization.split(' ')[1],
     );
     request.tokenPayload = tokenPayload;
+    request.token = authorization.split(' ')[1];
     return next.handle();
   }
 }

@@ -206,4 +206,13 @@ export class CustomerService {
       business: businessId,
     });
   }
+
+  async logout(customerId: string, token: string) {
+    const existingCustomer = await this.customerModel.findById(customerId);
+    existingCustomer.tokens = existingCustomer.tokens.filter(
+      (customerToken) => customerToken !== token,
+    );
+    await existingCustomer.save();
+    return { success: true, msg: 'User has successfully logged out.' };
+  }
 }

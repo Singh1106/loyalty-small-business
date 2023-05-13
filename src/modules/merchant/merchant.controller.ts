@@ -14,7 +14,7 @@ import {
 } from './DTO/merchant.dto';
 import { VerifyJWTAndFetchPayload } from 'src/interceptors/verify-jwt-and-fetch-payload';
 import { JwtTokenPayload } from 'src/static/jwt-interface';
-import { RequestWithJWTTokenPayload } from '../customer/DTO/customer.dto';
+import { RequestWithJWTTokenPayloadAndToken } from '../customer/DTO/customer.dto';
 
 @Controller('merchant')
 export class MerchantController {
@@ -35,7 +35,7 @@ export class MerchantController {
 
   @Get('fetchMyBusinesses')
   @UseInterceptors(VerifyJWTAndFetchPayload)
-  async fetchMyBusinesses(@Req() request: RequestWithJWTTokenPayload) {
+  async fetchMyBusinesses(@Req() request: RequestWithJWTTokenPayloadAndToken) {
     const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
     return await this.merchantService.fetchMyBusinesses(jwtTokenPayload.sub);
   }
@@ -43,7 +43,7 @@ export class MerchantController {
   @Get('fetchTransactionsWithThisBusiness/:businessId')
   @UseInterceptors(VerifyJWTAndFetchPayload)
   async fetchTransactionsWithThisBusiness(
-    @Req() request: RequestWithJWTTokenPayload,
+    @Req() request: RequestWithJWTTokenPayloadAndToken,
     @Param() params: any,
   ) {
     const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
