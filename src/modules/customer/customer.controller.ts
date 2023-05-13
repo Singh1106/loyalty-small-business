@@ -10,7 +10,7 @@ import {
 import { CustomerService } from './customer.service';
 import {
   FindOrCreateCustomerAndSendOtpForm,
-  RequestWithJWTTokenPayload,
+  RequestWithJWTTokenPayloadAndToken,
   ValidateOtpCustomerBodyForm,
 } from './DTO/customer.dto';
 import { VerifyJWTAndFetchPayload } from 'src/interceptors/verify-jwt-and-fetch-payload';
@@ -36,7 +36,7 @@ export class CustomerController {
   @Get('fetchBusinessesIHaveTransactedWith')
   @UseInterceptors(VerifyJWTAndFetchPayload)
   async fetchBusinessesIHaveTransactedWith(
-    @Req() request: RequestWithJWTTokenPayload,
+    @Req() request: RequestWithJWTTokenPayloadAndToken,
   ) {
     const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
     return await this.customerService.fetchBusinessesIHaveTransactedWith(
@@ -47,13 +47,22 @@ export class CustomerController {
   @Get(`fetchTransactionsWithThisBusiness/:businessId`)
   @UseInterceptors(VerifyJWTAndFetchPayload)
   async fetchTransactionsWithThisBusiness(
-    @Req() request: RequestWithJWTTokenPayload,
+    @Req() request: RequestWithJWTTokenPayloadAndToken,
     @Param() params: any,
   ) {
     const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
     return await this.customerService.fetchTransactionsWithThisBusiness(
       jwtTokenPayload.sub,
       params.businessId,
+    );
+  }
+  @Get(`logout`)
+  @UseInterceptors(VerifyJWTAndFetchPayload)
+  async logout(@Req() request: RequestWithJWTTokenPayloadAndToken) {
+    const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
+    return await this.customerService.logout(
+      jwtTokenPayload.sub,
+      request.token,
     );
   }
 }

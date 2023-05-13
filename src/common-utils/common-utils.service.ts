@@ -36,8 +36,7 @@ export class CommonUtilsService {
     return true;
   }
   generateOtp(length: number): string {
-    const chars =
-      '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const chars = '0123456789';
     let otp = '';
     for (let i = 0; i < length; i++) {
       otp += chars[Math.floor(Math.random() * chars.length)];
