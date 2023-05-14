@@ -47,7 +47,7 @@ export class ValidateOtpCustomerBodyForm {
   otp: string;
 }
 
-export class RequestWithJWTTokenPayloadAndToken extends Request {
+export interface RequestWithJWTTokenPayloadAndToken extends Request {
   tokenPayload: JwtTokenPayload;
   token: string;
 }
