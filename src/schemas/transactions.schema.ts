@@ -38,6 +38,11 @@ export const TransactionSchema = new mongoose.Schema(
         },
       },
     },
+    earning: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -45,13 +50,14 @@ export const TransactionSchema = new mongoose.Schema(
 );
 
 export type Transaction = mongoose.Document & {
-  business: ObjectId;
+  business: string;
   customer: string;
   totalAmount: number;
   amountBreakup: {
-    loyalty: number;
+    loyalty: { amount: number };
     nonLoyalty: { amount: number; paymentMethod: NonLoyaltyPaymentMethods };
   };
+  earning: number;
 };
 
 export const TransactionModel = mongoose.model(

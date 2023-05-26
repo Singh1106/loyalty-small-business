@@ -15,6 +15,18 @@ export const CustomerSchema = new mongoose.Schema(
       required: false,
       type: String,
     },
+    businessesEarning: [
+      {
+        id: {
+          required: true,
+          type: String,
+        },
+        loyalty: {
+          required: true,
+          type: Number,
+        },
+      },
+    ],
     tokens: [
       {
         type: String,
@@ -31,6 +43,7 @@ export type Customer = mongoose.Document & {
   phoneNumber: string;
   countryCode: string;
   name?: string;
+  businessesEarning: { id: string; loyalty: number }[];
   tokens?: string[];
 };
 
