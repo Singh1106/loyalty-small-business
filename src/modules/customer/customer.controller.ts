@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import {
+  ExecuteAddTransactionProcessBodyForm,
   FindOrCreateCustomerAndSendOtpForm,
   RequestWithJWTTokenPayloadAndToken,
   ValidateOtpCustomerBodyForm,
@@ -63,6 +64,26 @@ export class CustomerController {
     return await this.customerService.logout(
       jwtTokenPayload.sub,
       request.token,
+    );
+  }
+
+  @Get(`getCustomer`)
+  @UseInterceptors(VerifyJWTAndFetchPayload)
+  async getCustomer(@Req() request: RequestWithJWTTokenPayloadAndToken) {
+    const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
+    return await this.customerService.findCustomerById(jwtTokenPayload.sub);
+  }
+
+  @Post(`executeAddTransactionProcess`)
+  @UseInterceptors(VerifyJWTAndFetchPayload)
+  async executeAddTransactionProcess(
+    @Req() request: RequestWithJWTTokenPayloadAndToken,
+    @Body() form: ExecuteAddTransactionProcessBodyForm,
+  ) {
+    const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
+    return await this.customerService.executeAddTransactionProcess(
+      form,
+      jwtTokenPayload.sub,
     );
   }
 }

@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Customer } from 'src/schemas/customer.schema';
 import {
+  AmountBreakupForm,
+  ExecuteAddTransactionProcessBodyForm,
   FindOrCreateCustomerAndSendOtpForm,
   ValidateOtpCustomerBodyForm,
 } from './DTO/customer.dto';
@@ -157,6 +159,8 @@ export class CustomerService {
       );
     }
 
+    // todo: update the otp's status to expired.
+
     const token = this.jwtAuthService.generateJWT(customer);
     customer.tokens.push(token);
     await customer.save();
@@ -214,5 +218,116 @@ export class CustomerService {
     );
     await existingCustomer.save();
     return { success: true, msg: 'User has successfully logged out.' };
+  }
+
+  async findCustomerById(id: string): Promise<Customer | null> {
+    const [error, existingCustomer] = await to(this.customerModel.findById(id));
+    if (error) {
+      throw new HttpException(
+        `Error finding customer by id: ${error.message}`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (!existingCustomer) {
+      throw new HttpException(
+        `Customer with this id: ${id} does not exist.`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    return existingCustomer;
+  }
+
+  async findBusinessById(id: string): Promise<Business | null> {
+    const [error, existingBusiness] = await to(this.businessModel.findById(id));
+    if (error) {
+      throw new HttpException(
+        `Error finding Business by id: ${error.message}`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (!existingBusiness) {
+      throw new HttpException(
+        `Business with this id: ${id} does not exist.`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    return existingBusiness;
+  }
+
+  getEarningForThisTransaction(
+    amountBreakup: AmountBreakupForm,
+    earningPercentageForThisBusiness: number,
+  ): number {
+    if (amountBreakup.nonLoyalty) {
+      return (
+        (amountBreakup.nonLoyalty.amount * earningPercentageForThisBusiness) /
+        100
+      );
+    }
+  }
+
+  async createTransaction(form): Promise<Transaction> {
+    const newTransaction = new this.transactionModel(form);
+    const [error, createdTransaction] = await to(newTransaction.save());
+    if (error) {
+      throw new HttpException(
+        `Error creating transaction: ${error.message}`,
+        HttpStatus.CONFLICT,
+      );
+    }
+    // todo: Make jobs for this.
+    return createdTransaction;
+  }
+
+  getTotalAmountFromAmountBreakup(amountBreakup: AmountBreakupForm): number {
+    let totalAmount = 0;
+    if (amountBreakup.nonLoyalty) {
+      totalAmount += amountBreakup.nonLoyalty.amount;
+    }
+    if (amountBreakup.loyalty) {
+      totalAmount += amountBreakup.loyalty.amount;
+    }
+    return totalAmount;
+  }
+
+  async executeAddTransactionProcess(
+    form: ExecuteAddTransactionProcessBodyForm,
+    id: string,
+  ): Promise<Transaction | null> {
+    const existingCustomer = await this.findCustomerById(id);
+    const existingBusiness = await this.findBusinessById(form.businessId);
+    const earningPercentageForThisBusiness = existingBusiness.earningPercentage;
+    const earningForThisTransaction = this.getEarningForThisTransaction(
+      form.amountBreakup,
+      earningPercentageForThisBusiness,
+    );
+    const payloadForThisTransaction = {
+      business: form.businessId,
+      customer: id,
+      amountBreakup: form.amountBreakup,
+      totalAmount: this.getTotalAmountFromAmountBreakup(form.amountBreakup),
+      earning: earningForThisTransaction,
+    };
+    const createdTransaction = await this.createTransaction(
+      payloadForThisTransaction,
+    );
+    let firstTransactionOfThisUserWithThisBusiness = true;
+    existingCustomer.businessesEarning = existingCustomer.businessesEarning.map(
+      (earningPerBusiness) => {
+        if (earningPerBusiness.id === form.businessId) {
+          earningPerBusiness.loyalty += earningForThisTransaction;
+          firstTransactionOfThisUserWithThisBusiness = false;
+        }
+        return earningPerBusiness;
+      },
+    );
+    if (firstTransactionOfThisUserWithThisBusiness) {
+      existingCustomer.businessesEarning.push({
+        id: form.businessId,
+        loyalty: earningForThisTransaction,
+      });
+    }
+    existingCustomer.save();
+    return createdTransaction;
   }
 }

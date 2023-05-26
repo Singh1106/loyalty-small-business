@@ -103,7 +103,7 @@ export class MerchantService {
     return createdMerchant;
   }
 
-  async generateAndSaveOtp(customer: Customer): Promise<Otp> {
+  async generateAndSaveOtp(merchant: Merchant): Promise<Otp> {
     const otp = this.commonUtilsService.generateOtp(6);
     const now = new Date();
     const expiryTime = new Date(
@@ -112,7 +112,7 @@ export class MerchantService {
     const createdOtp = new this.otpModel({
       otp,
       userType: UserTypes.customer,
-      refId: customer._id,
+      refId: merchant._id,
       expiry: expiryTime,
     });
     const savedOtp = await createdOtp.save();

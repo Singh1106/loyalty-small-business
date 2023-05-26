@@ -20,6 +20,11 @@ export const OtpSchema = new mongoose.Schema(
       required: true,
       type: Date,
     },
+    status: {
+      required: true,
+      default: 'unexpired',
+      type: String,
+    },
   },
   {
     timestamps: true,
@@ -31,6 +36,7 @@ export type Otp = mongoose.Document & {
   refId: string;
   otp: string;
   expiry: string;
+  status: string;
 };
 
 export const OtpModel = mongoose.model('otp', OtpSchema);
