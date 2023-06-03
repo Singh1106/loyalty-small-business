@@ -313,12 +313,14 @@ export class CustomerService {
       payloadForThisTransaction,
     );
 
-    // Handle subtracting loyalty from user's business' balance as well
     let firstTransactionOfThisUserWithThisBusiness = true;
     existingCustomer.businessesEarning = existingCustomer.businessesEarning.map(
       (earningPerBusiness) => {
         if (earningPerBusiness.id === form.businessId) {
-          earningPerBusiness.loyalty += earningForThisTransaction;
+          earningPerBusiness.loyalty =
+            earningPerBusiness.loyalty +
+            earningForThisTransaction -
+            form.amountBreakup.loyalty.amount;
           firstTransactionOfThisUserWithThisBusiness = false;
         }
         return earningPerBusiness;
