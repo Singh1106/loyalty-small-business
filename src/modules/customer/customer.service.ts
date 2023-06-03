@@ -264,6 +264,7 @@ export class CustomerService {
         100
       );
     }
+    return 0;
   }
 
   async createTransaction(form): Promise<Transaction> {
@@ -311,6 +312,8 @@ export class CustomerService {
     const createdTransaction = await this.createTransaction(
       payloadForThisTransaction,
     );
+
+    // Handle subtracting loyalty from user's business' balance as well
     let firstTransactionOfThisUserWithThisBusiness = true;
     existingCustomer.businessesEarning = existingCustomer.businessesEarning.map(
       (earningPerBusiness) => {
