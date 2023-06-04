@@ -258,9 +258,9 @@ export class CustomerService {
     amountBreakup: AmountBreakupForm,
     earningPercentageForThisBusiness: number,
   ): number {
-    if (amountBreakup.nonLoyalty) {
+    if (amountBreakup?.nonLoyalty) {
       return (
-        (amountBreakup.nonLoyalty.amount * earningPercentageForThisBusiness) /
+        (amountBreakup?.nonLoyalty?.amount * earningPercentageForThisBusiness) /
         100
       );
     }
@@ -282,11 +282,11 @@ export class CustomerService {
 
   getTotalAmountFromAmountBreakup(amountBreakup: AmountBreakupForm): number {
     let totalAmount = 0;
-    if (amountBreakup.nonLoyalty) {
-      totalAmount += amountBreakup.nonLoyalty.amount;
+    if (amountBreakup?.nonLoyalty) {
+      totalAmount += amountBreakup?.nonLoyalty?.amount;
     }
-    if (amountBreakup.loyalty) {
-      totalAmount += amountBreakup.loyalty.amount;
+    if (amountBreakup?.loyalty) {
+      totalAmount += amountBreakup?.loyalty?.amount;
     }
     return totalAmount;
   }
@@ -306,7 +306,7 @@ export class CustomerService {
       business: form.businessId,
       customer: id,
       amountBreakup: form.amountBreakup,
-      totalAmount: this.getTotalAmountFromAmountBreakup(form.amountBreakup),
+      totalAmount: this.getTotalAmountFromAmountBreakup(form?.amountBreakup),
       earning: earningForThisTransaction,
     };
     const createdTransaction = await this.createTransaction(
@@ -320,7 +320,7 @@ export class CustomerService {
           earningPerBusiness.loyalty =
             earningPerBusiness.loyalty +
             earningForThisTransaction -
-            form.amountBreakup.loyalty.amount;
+            form?.amountBreakup?.loyalty?.amount;
           firstTransactionOfThisUserWithThisBusiness = false;
         }
         return earningPerBusiness;
