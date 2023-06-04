@@ -317,10 +317,13 @@ export class CustomerService {
     existingCustomer.businessesEarning = existingCustomer.businessesEarning.map(
       (earningPerBusiness) => {
         if (earningPerBusiness.id === form.businessId) {
-          earningPerBusiness.loyalty =
-            earningPerBusiness.loyalty +
-            earningForThisTransaction -
-            form?.amountBreakup?.loyalty?.amount;
+          earningPerBusiness.loyalty = Number(
+            (
+              earningPerBusiness.loyalty +
+              earningForThisTransaction -
+              form?.amountBreakup?.loyalty?.amount
+            ).toFixed(0),
+          );
           firstTransactionOfThisUserWithThisBusiness = false;
         }
         return earningPerBusiness;
