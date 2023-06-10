@@ -4,7 +4,6 @@ import to from 'await-to-js';
 import { Model } from 'mongoose';
 import { CommonUtilsService } from 'src/common-utils/common-utils.service';
 import { Business } from 'src/schemas/business.schema';
-import { Customer } from 'src/schemas/customer.schema';
 import { Otp } from 'src/schemas/otp.schema';
 import { Transaction } from 'src/schemas/transactions.schema';
 import { UserTypes } from 'src/static/enums';
@@ -124,7 +123,7 @@ export class MerchantService {
   }
   async validateOtpAndGenerateToken(
     form: ValidateOtpMerchantBodyForm,
-  ): Promise<{ token: string }> {
+  ): Promise<{ token: string; merchant: Merchant }> {
     const merchant = await this.merchantModel.findOne({
       phoneNumber: form.phoneNumber,
     });
@@ -162,7 +161,7 @@ export class MerchantService {
     merchant.tokens.push(token);
     await merchant.save();
 
-    return { token };
+    return { token, merchant };
   }
 
   async fetchMyBusinesses(merchantId: string): Promise<Business[]> {
