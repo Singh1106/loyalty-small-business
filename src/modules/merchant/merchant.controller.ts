@@ -52,4 +52,11 @@ export class MerchantController {
       params.businessId,
     );
   }
+
+  @Get(`getMerchant`)
+  @UseInterceptors(VerifyJWTAndFetchPayload)
+  async getCustomer(@Req() request: RequestWithJWTTokenPayloadAndToken) {
+    const jwtTokenPayload: JwtTokenPayload = request.tokenPayload;
+    return await this.merchantService.findMerchantById(jwtTokenPayload.sub);
+  }
 }

@@ -177,4 +177,21 @@ export class MerchantService {
       business: businessId,
     });
   }
+
+  async findMerchantById(id: string): Promise<Merchant | null> {
+    const [error, existingMerchant] = await to(this.merchantModel.findById(id));
+    if (error) {
+      throw new HttpException(
+        `Error finding merchant by id: ${error.message}`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    if (!existingMerchant) {
+      throw new HttpException(
+        `Merchant with this id: ${id} does not exist.`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    return existingMerchant;
+  }
 }
