@@ -162,6 +162,7 @@ export class MerchantService {
     await merchant.save();
 
     return { token, merchant };
+    // return customer in customer controller as well.
   }
 
   async fetchMyBusinesses(merchantId: string): Promise<Business[]> {
