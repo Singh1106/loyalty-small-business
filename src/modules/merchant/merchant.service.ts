@@ -173,9 +173,10 @@ export class MerchantService {
     merchantId: string,
     businessId: string,
   ): Promise<Transaction[]> {
-    return await this.transactionModel.find({
-      business: businessId,
-    });
+    return await this.transactionModel
+      .find({ business: businessId })
+      .populate('customer')
+      .exec();
   }
 
   async findMerchantById(id: string): Promise<Merchant | null> {
